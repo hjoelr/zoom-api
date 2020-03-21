@@ -1,6 +1,9 @@
 {
     "name": "umeduardo/zoom-api",
-    "description": "Api Zoom",
+    "type": "library",
+    "description": "Api Zoom v2",
+    "keywords": ["zoom","api","v2"],
+    "license": "MIT",
     "require": {
         "guzzlehttp/guzzle": "~6.0",
         "firebase/php-jwt": "^5.0"
