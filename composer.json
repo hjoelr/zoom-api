@@ -1,7 +1,7 @@
 {
-    "name": "zoom/zoom",
+    "name": "umeduardo/zoom-api",
     "description": "Api Zoom",
-    "minimum-stability": "beta",
+    "minimum-stability": "stable",
     "require": {
         "guzzlehttp/guzzle": "~6.0",
         "firebase/php-jwt": "^5.0"
