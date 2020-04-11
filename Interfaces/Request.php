@@ -27,6 +27,21 @@ class Request {
      */
     protected $client;
 
+	/**
+	 * @var int number of requests made since $throttle_time
+	 */
+    protected $throttle_count;
+
+	/**
+	 * @var int the time the throttle starts counting from
+	 */
+    protected $throttle_time;
+
+	/**
+	 * @var int number of requests allowed by Zoom per second
+	 */
+    protected $throttle_limit = 10;
+
     /**
      * @var string
      */
@@ -81,6 +96,8 @@ class Request {
      * @return array|mixed
      */
     protected function get($method, $fields = []) {
+    	$this->maybe_throttle();
+
         try {
             $response = $this->client->request('GET', $this->apiPoint . $method, [
                 'query' => $fields,
@@ -105,6 +122,8 @@ class Request {
     protected function post($method, $fields) {
         $body = \json_encode($fields, JSON_PRETTY_PRINT);
 
+        $this->maybe_throttle();
+
         try {
             $response = $this->client->request('POST', $this->apiPoint . $method,
                 ['body' => $body, 'headers' => $this->headers()]);
@@ -126,6 +145,8 @@ class Request {
      */
     protected function patch($method, $fields) {
         $body = \json_encode($fields, JSON_PRETTY_PRINT);
+
+        $this->maybe_throttle();
 
         try {
             $response = $this->client->request('PATCH', $this->apiPoint . $method,
@@ -149,6 +170,8 @@ class Request {
     protected function put($method, $fields) {
         $body = \json_encode($fields, JSON_PRETTY_PRINT);
 
+        $this->maybe_throttle();
+
         try {
             $response = $this->client->request('PUT', $this->apiPoint . $method,
                 ['body' => $body, 'headers' => $this->headers()]);
@@ -170,6 +193,8 @@ class Request {
      */
     protected function delete($method, $fields = []) {
         $body = \json_encode($fields, JSON_PRETTY_PRINT);
+
+        $this->maybe_throttle();
 
         try {
             $response = $this->client->request('DELETE', $this->apiPoint . $method,
@@ -196,4 +221,34 @@ class Request {
 
         return $result;
     }
+
+	/**
+	 * Resets the throttle variables at the appropriate time.
+	 *
+	 * @return bool true if throttle was reset; false if it wasn't
+	 */
+    protected function reset_throttle() {
+		if ( null === $this->throttle_time || $this->throttle_time < time() ) {
+			$this->throttle_time = time();
+			$this->throttle_count = 0;
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Possibly stall the thread to keep within API limits.
+	 */
+	protected function maybe_throttle() {
+    	if ($this->reset_throttle()) {
+    		return;
+		}
+
+    	// Pause execution until we pass throttle time.
+    	if ( $this->throttle_count >= $this->throttle_limit ) {
+    		while (!$this->reset_throttle()) {
+    			sleep(1);
+			}
+		}
+	}
 }
