@@ -80,8 +80,10 @@ class Request {
      */
     protected function generateJWT() {
         $token = [
+        	'aud' => null,
             'iss' => $this->apiKey,
-            'exp' => time() + 60,
+			'exp' => time() + 60,
+			'iat' => time()
         ];
 
         return JWT::encode($token, $this->apiSecret);
