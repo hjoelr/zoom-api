@@ -30,7 +30,7 @@ class Request {
 	/**
 	 * @var int number of requests made since $throttle_time
 	 */
-    protected static $throttle_count;
+    protected static $throttle_request_count;
 
 	/**
 	 * @var int the time the throttle starts counting from
@@ -231,8 +231,8 @@ class Request {
 	 */
     protected function reset_throttle() {
 		if ( null === Request::$throttle_time || Request::$throttle_time < time() ) {
-			Request::$throttle_time = time();
-			Request::$throttle_count = 0;
+			Request::$throttle_time          = time();
+			Request::$throttle_request_count = 0;
 			return true;
 		}
 		return false;
@@ -243,14 +243,14 @@ class Request {
 	 */
 	protected function maybe_throttle() {
 		// Increase our throttle count by one each time this is called.
-		++Request::$throttle_count;
+		++Request::$throttle_request_count;
 
     	if ($this->reset_throttle()) {
     		return;
 		}
 
     	// Pause execution until we pass throttle time.
-    	if ( Request::$throttle_count >= $this->throttle_limit ) {
+    	if ( Request::$throttle_request_count >= $this->throttle_limit ) {
     		while (!$this->reset_throttle()) {
     			sleep(1);
 			}
