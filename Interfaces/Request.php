@@ -30,12 +30,12 @@ class Request {
 	/**
 	 * @var int number of requests made since $throttle_time
 	 */
-    protected $throttle_count;
+    protected static $throttle_count;
 
 	/**
 	 * @var int the time the throttle starts counting from
 	 */
-    protected $throttle_time;
+    protected static $throttle_time;
 
 	/**
 	 * @var int number of requests allowed by Zoom per second
@@ -230,9 +230,9 @@ class Request {
 	 * @return bool true if throttle was reset; false if it wasn't
 	 */
     protected function reset_throttle() {
-		if ( null === $this->throttle_time || $this->throttle_time < time() ) {
-			$this->throttle_time = time();
-			$this->throttle_count = 0;
+		if ( null === Request::$throttle_time || Request::$throttle_time < time() ) {
+			Request::$throttle_time = time();
+			Request::$throttle_count = 0;
 			return true;
 		}
 		return false;
@@ -247,7 +247,7 @@ class Request {
 		}
 
     	// Pause execution until we pass throttle time.
-    	if ( $this->throttle_count >= $this->throttle_limit ) {
+    	if ( Request::$throttle_count >= $this->throttle_limit ) {
     		while (!$this->reset_throttle()) {
     			sleep(1);
 			}
