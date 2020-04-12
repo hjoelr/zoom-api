@@ -242,6 +242,9 @@ class Request {
 	 * Possibly stall the thread to keep within API limits.
 	 */
 	protected function maybe_throttle() {
+		// Increase our throttle count by one each time this is called.
+		++Request::$throttle_count;
+
     	if ($this->reset_throttle()) {
     		return;
 		}
